@@ -1,0 +1,52 @@
+table,column,type,example,description,key,allowed_values,notes
+students.csv,student_id,string,S000123,Identificador do estudante (join com demais tabelas).,PK (esperada),,Há ~2% de duplicatas exatas (mesmo student_id).
+students.csv,birth_date,date (YYYY-MM-DD),2001-07-14,Data de nascimento do estudante.,,,
+students.csv,state,string,SP,UF do estudante.,,,"SP,RJ,MG,RS,SC,PR,BA,PE,CE,DF"
+students.csv,campus,string,Centro,Campus de vínculo.,,,"Campus Norte,Campus Sul,Centro,Online"
+students.csv,employment_type,string,Estágio,Tipo de vínculo/emprego do estudante.,,,"Estágio,CLT,Freelancer,Sem renda,Bolsista"
+students.csv,declared_income_monthly,float,2450.35,Renda mensal declarada (pode ter outliers).,,,Alguns outliers (muito baixo/alto).
+students.csv,created_at,date (YYYY-MM-DD),2023-10-02,Data de criação do cadastro.,,,
+academic.csv,student_id,string,S000123,Identificador do estudante (join).,PK (esperada),,Uma linha por estudante (sem sujeira proposital).
+academic.csv,course_area,string,Computação,Área do curso.,,,"Engenharia,Computação,Administração,Economia,Direito,Medicina,Enfermagem,Psicologia,Arquitetura,Design,Matemática,Física,Química,Biologia,Comunicação"
+academic.csv,current_semester,int,5,Semestre atual (1 a 12).,,,
+academic.csv,scholarship,int (0/1),1,Indicador se possui bolsa.,,,"0,1"
+academic.csv,gpa_current,float,7.85,Coeficiente/GPA atual (0 a 10).,,,
+academic.csv,attendance_rate,float,0.91,Frequência (0 a 1).,,,
+academic.csv,credits_completed,int,54,Créditos concluídos (aprox. proporcional ao semestre).,,,
+academic.csv,dropped_out,int (0/1),0,Indicador de evasão.,,,"0,1"
+academic.csv,last_update,date (YYYY-MM-DD),2024-11-20,Última atualização do registro acadêmico.,,,
+applications.csv,application_id,string,A001203,Identificador da solicitação.,PK (esperada),,"Há ~1,5% de duplicatas exatas (mesmo application_id)."
+applications.csv,student_id,string,S000123,Identificador do estudante que solicitou.,FK -> students.student_id,,
+applications.csv,application_date,date (YYYY-MM-DD),2024-08-03,Data da solicitação.,,,
+applications.csv,requested_amount,float,3000.00,Valor solicitado.,,,
+applications.csv,installments,int,12,Número de parcelas solicitadas.,,,"3,6,9,12,18,24"
+applications.csv,purpose,string,Notebook,Finalidade do crédito.,,,"Notebook,Curso,Moradia,Transporte,Intercâmbio,Taxas/Documentos,Saúde"
+applications.csv,has_guarantor,int (0/1),0,Indicador de fiador/garantidor.,,,"0,1"
+applications.csv,rent_expense,float,950.00,Despesa mensal com moradia (proxy).,,,
+applications.csv,other_debts,float,420.50,Outras dívidas (proxy).,,,
+applications.csv,channel,string,App,Canal de solicitação.,,,"App,Web,Agência,WhatsApp"
+transactions_monthly.csv,student_id,string,S000123,Identificador do estudante.,(chave natural com month),,Há desbalanceamento: estudantes com poucos meses e outros com múltiplas linhas no mesmo mês.
+transactions_monthly.csv,month,string (YYYY-MM),2024-07,Mês de referência.,(chave natural com student_id),,"Alguns estudantes possuem múltiplas linhas por (student_id,month); requer agregação."
+transactions_monthly.csv,inflows,float,2600.10,Entradas no mês (agregadas por linha).,,,"Se houver múltiplas linhas no mês, somar ao agregar."
+transactions_monthly.csv,outflows,float,2450.00,Saídas no mês (agregadas por linha).,,,"Se houver múltiplas linhas no mês, somar ao agregar."
+transactions_monthly.csv,avg_balance,float,180.55,Saldo médio mensal (pode ser negativo).,,,"Ao agregar múltiplas linhas, sugerido tirar média (ou média ponderada simples)."
+transactions_monthly.csv,overdraft_events,int,1,Eventos de cheque especial/saldo negativo (proxy).,,,"Ao agregar múltiplas linhas, somar."
+transactions_monthly.csv,late_fees_count,int,0,Quantidade de taxas/multas por atraso (proxy).,,,"Ao agregar múltiplas linhas, somar."
+transactions_monthly.csv,(observação),,,,,,"Duplicatas exatas ~1% e necessidade de deduplicação/aggregação por (student_id, month)."
+loans.csv,loan_id,string,L000532,Identificador do empréstimo aprovado.,PK,,
+loans.csv,application_id,string,A001203,Solicitação que originou o empréstimo.,FK -> applications.application_id,,Nem toda application vira loan (~60% aprovadas).
+loans.csv,student_id,string,S000123,Tomador do empréstimo.,FK -> students.student_id,,
+loans.csv,loan_amount,float,3000.00,Valor do empréstimo.,,,
+loans.csv,interest_rate_monthly,float,0.0325,"Taxa de juros mensal (proxy), correlacionada com risco.",,,
+loans.csv,installments,int,12,Parcelas contratadas.,,,
+loans.csv,start_date,date (YYYY-MM-DD),2024-08-03,Data de início do empréstimo.,,,
+loans.csv,status,string,ACTIVE,Status do empréstimo.,,,"ACTIVE,CLOSED,DEFAULT"
+repayments.csv,loan_id,string,L000532,Identificador do empréstimo (join com loans).,PK (esperada),,Uma linha por loan_id.
+repayments.csv,student_id,string,S000123,Identificador do estudante (redundante para facilitar joins).,FK -> students.student_id,,
+repayments.csv,missed_payments,int,2,Quantidade de parcelas perdidas.,,,
+repayments.csv,late_days_sum,int,95,Soma de dias em atraso.,,,
+repayments.csv,defaulted,int (0/1),1,Label principal de inadimplência.,,,"0,1"
+repayments.csv,months_observed,int,18,Quantidade de meses observados em transactions (útil para tratar série curta).,,,
+macro_monthly.csv,month,string (YYYY-MM),2024-07,Mês de referência para join temporal.,PK (esperada),,
+macro_monthly.csv,inflation_index,float,108.234,Índice de inflação sintético (tendência).,,,
+macro_monthly.csv,unemployment_proxy,float,8.40,Proxy de desemprego mensal (variação).,,,
